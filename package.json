@@ -1,0 +1,12 @@
+{
+  "name": "china-debate-app",
+  "version": "1.0.0",
+  "description": "중국문화 탐구 AI 토론 웹 애플리케이션 (4과)",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --main:#c25b45; --main-active:#9a4232; --gold:#d9a441;
+    --ink:#141413; --body:#2e2d2a; --sub:#6c6a64; --line:#e4dcd0; --fill:#fbf8f1; --bad:#c64545;
+    --card:#f1e8d8; --cream-strong:#e9dcc6; --dark:#1f1b18; --dark-el:#2d2824; --on-dark:#faf9f5; --on-dark-soft:#a09d96;
+    --teal:#4f9e8a; --hl:#ffe58a; --hl-pink:#ffd3c4;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Gowun Dodum',sans-serif; background:var(--fill); color:var(--body); font-size:17px; line-height:1.65; }
+  h1, h2, h3 { font-family:'Gowun Batang',serif; color:var(--ink); }
+  b, strong { color:var(--ink); font-weight:700; }
+  input, textarea, button { font-family:'Gowun Dodum',sans-serif; }
+  .hidden { display:none !important; }
+  .wrap { max-width:820px; margin:0 auto; padding:0 16px 96px; }
+
+  /* 형광펜 */
+  mark { background:linear-gradient(transparent 45%, var(--hl) 45%); color:inherit; padding:0 2px; font-weight:700; }
+  mark.pink { background:linear-gradient(transparent 45%, var(--hl-pink) 45%); }
+  .py { color:var(--main); font-weight:700; font-size:.92em; }
+
+  header { position:sticky; top:0; z-index:10; height:64px; display:flex; align-items:center; justify-content:space-between; background:var(--fill); border-bottom:1px solid var(--line); margin-bottom:24px; }
+  header h1 { font-size:24px; margin:0; letter-spacing:-0.5px; font-weight:700; }
+  .who { font-size:15px; color:var(--sub); }
+  .linkbtn { background:none; border:0; color:var(--main); font-size:15px; cursor:pointer; text-decoration:underline; margin-left:8px; }
+
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:20px; }
+  .badge { display:inline-block; background:var(--cream-strong); color:var(--ink); font-size:14px; font-weight:700; padding:4px 12px; border-radius:99px; }
+  .err { color:var(--bad); font-size:15px; margin-top:8px; font-weight:700; }
+  input[type=text], textarea { width:100%; font-size:17px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); }
+  input:focus, textarea:focus { outline:none; border-color:var(--main); box-shadow:0 0 0 3px rgba(194,91,69,.15); }
+  textarea { resize:vertical; min-height:120px; line-height:1.6; }
+  .btn { background:var(--main); color:#fff; border:0; font-size:16px; font-weight:700; height:46px; padding:0 22px; border-radius:8px; cursor:pointer; }
+  .btn:active { background:var(--main-active); }
+  .btn.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .btn:disabled { opacity:.45; cursor:default; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+
+  /* 팝업 */
+  .overlay { position:fixed; inset:0; background:rgba(20,20,19,.6); display:flex; align-items:flex-start; justify-content:center; z-index:20; padding:24px 12px; overflow-y:auto; }
+  .pop { background:var(--fill); border-radius:14px; padding:28px 24px; max-width:420px; width:100%; margin:auto; text-align:center; }
+  .pop.form { text-align:left; }
+  .pop.wide { max-width:720px; text-align:left; }
+  .pop h2 { font-size:26px; margin:10px 0 14px; line-height:1.3; font-weight:700; }
+  .pop .big { font-size:50px; }
+
+  .timg { display:block; width:100%; height:auto; border-radius:12px; border:1px solid var(--line); cursor:zoom-in; margin:6px 0 14px; }
+  .imgmsg { font-size:14px; color:var(--bad); margin-bottom:10px; }
+  .zoombox { position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:50; display:flex; align-items:center; justify-content:center; padding:12px; cursor:zoom-out; }
+  .zoombox img { max-width:100%; max-height:100%; }
+
+  /* 설명 팝업 */
+  .steps-how { list-style:none; margin:0 0 16px; padding:0; display:grid; gap:10px; }
+  .steps-how li { display:flex; gap:12px; align-items:flex-start; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; font-size:16px; }
+  .steps-how .n { flex:none; width:30px; height:30px; border-radius:50%; background:var(--main); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .score-ex { display:grid; gap:6px; margin-top:6px; font-size:15px; }
+  .score-ex span { display:inline-block; min-width:64px; font-weight:700; }
+  .warn { background:#fdecea; border:2px solid var(--bad); border-radius:10px; padding:14px 16px; margin-bottom:16px; font-size:16px; line-height:1.6; }
+  .warn .wt { color:var(--bad); font-weight:700; font-size:19px; margin-bottom:4px; }
+  .warn b { color:var(--bad); }
+  .topic-head { text-align:center; margin-bottom:14px; }
+  .topic-head h2 { font-size:32px; line-height:1.35; margin:12px 0 0; letter-spacing:-0.5px; }
+  @media (max-width:600px){ .topic-head h2 { font-size:25px; } }
+  .zh { font-family:'Noto Sans SC','Gowun Dodum',sans-serif; }
+  /* 한국 vs 중국 비교 */
+  .cmp { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .cmp > div { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .cmp h3 { font-size:19px; margin:0 0 8px; font-weight:700; }
+  .cmp ul { margin:0; padding-left:18px; }
+  .cmp li { margin-bottom:6px; font-size:16px; }
+  .rule { background:var(--dark); color:var(--on-dark); border-radius:10px; padding:14px 16px; font-size:16px; margin-bottom:14px; }
+  .rule b { color:var(--gold); }
+
+  .sides { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .sides button { border:2px solid var(--line); background:#fff; border-radius:12px; padding:18px 10px; font-size:16px; cursor:pointer; color:var(--body); }
+  .sides button:hover { border-color:var(--main); }
+  .sides b { display:block; font-family:'Gowun Batang',serif; font-size:24px; margin-bottom:4px; }
+  .sides .pro b { color:var(--teal); } .sides .con b { color:var(--main); }
+
+  /* 내 입장 논거 */
+  .hints { display:grid; gap:8px; margin-top:12px; }
+  .hitem { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; font-size:16px; }
+  .hitem .t { font-size:17px; font-weight:700; color:var(--ink); }
+  .hitem .ex { color:var(--sub); font-size:15px; margin-top:2px; }
+  .sidetag { display:inline-block; font-weight:700; color:#fff; padding:2px 12px; border-radius:99px; font-size:15px; }
+  .sidetag.pro { background:var(--teal); } .sidetag.con { background:var(--main); }
+
+  /* 게이지 */
+  .gaugebox { position:sticky; top:64px; z-index:5; background:var(--dark); color:var(--on-dark); border-radius:12px; padding:16px 20px; margin-bottom:16px; }
+  .ghead { display:flex; justify-content:space-between; align-items:baseline; font-size:16px; color:var(--on-dark-soft); margin-bottom:8px; }
+  #gNum { color:var(--on-dark); font-family:'Gowun Batang',serif; font-size:30px; font-weight:700; }
+  #turnLabel b { color:var(--gold); font-size:20px; }
+  .gauge { height:14px; background:var(--dark-el); border-radius:99px; overflow:hidden; }
+  .gauge > div { height:100%; width:0; background:linear-gradient(90deg,var(--gold),var(--main)); transition:width .8s cubic-bezier(.2,.8,.2,1); }
+  .badges { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
+  .badges span { font-size:13px; padding:3px 10px; border-radius:99px; background:var(--dark-el); color:var(--on-dark-soft); transition:.3s; }
+  .badges span.on { background:var(--main); color:#fff; font-weight:700; }
+
+  /* 대화 */
+  .chat { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+  .msg { max-width:85%; padding:14px 18px; white-space:pre-wrap; word-break:break-word; border-radius:12px; font-size:17px; }
+  .msg.ai { align-self:flex-start; background:#fff; border:1px solid var(--line); color:var(--ink); }
+  .msg.me { align-self:flex-end; background:var(--dark); color:var(--on-dark); }
+  .msg .nm { display:block; font-size:14px; font-weight:700; color:var(--main); }
+  .msg.typing { color:var(--sub); }
+  .delta { align-self:flex-end; font-size:15px; padding:6px 14px; max-width:85%; border-radius:99px; }
+  .delta b { font-size:17px; }
+  .delta.up { background:#e3f1ea; color:#2f7d5f; } .delta.up b { color:#2f7d5f; }
+  .delta.zero { background:var(--cream-strong); color:var(--sub); }
+  .delta.down { background:#f7e2dc; color:var(--bad); } .delta.down b { color:var(--bad); }
+  .count { font-size:14px; color:var(--sub); }
+  .hint { font-size:15px; color:var(--body); margin-top:10px; background:#fff; border-radius:8px; padding:10px 12px; }
+
+  .fb > div { padding:12px 14px; margin-top:8px; background:#fff; border:1px solid var(--line); border-left:4px solid var(--line); border-radius:8px; font-size:16px; }
+  .fb .g { border-left-color:var(--teal); } .fb .i { border-left-color:var(--gold); } .fb .n { border-left-color:var(--main); }
+  .fly { position:fixed; left:50%; top:80px; transform:translateX(-50%); background:var(--dark); color:var(--on-dark); padding:10px 18px; border-radius:99px; z-index:30; font-weight:700; animation:fly 1.6s ease forwards; }
+  @keyframes fly { 0%{opacity:0;transform:translate(-50%,10px)} 20%{opacity:1;transform:translate(-50%,0)} 80%{opacity:1} 100%{opacity:0;transform:translate(-50%,-20px)} }
+  @media (max-width:600px){ .cmp,.sides{grid-template-columns:1fr} .msg{max-width:92%} .card{padding:18px 16px} .pop{padding:22px 16px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>중국문화 탐구 AI 토론</h1>
+    <div class="who"><span id="whoLabel"></span><button class="linkbtn hidden" id="topicBtn">주제 다시 보기</button></div>
+  </header>
+
+  <section id="debateView" class="hidden">
+    <div class="gaugebox">
+      <div class="ghead"><span>설득 게이지 <span id="gNum">0</span> / 100</span><span id="turnLabel"></span></div>
+      <div class="gauge"><div id="gBar"></div></div>
+      <div class="badges" id="catBadges"></div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <span class="badge">4과 · 토론 주제</span><span class="sidetag" id="sideTag"></span>
+      </div>
+      <div style="font-size:19px;font-weight:700;color:var(--ink);margin-top:8px" id="dTopic"></div>
+      <div style="margin-top:14px;font-weight:700">💡 내 입장에서 쓸 수 있는 근거</div>
+      <div class="hints" id="hintsMine"></div>
+    </div>
+
+    <div class="chat" id="chat"></div>
+    <div class="card" id="composer">
+      <textarea id="msgIn" maxlength="500" placeholder="나는 ~라고 생각해. 왜냐하면 ~이기 때문이야. 예를 들어 ~"></textarea>
+      <div class="row" style="justify-content:space-between;margin-top:8px">
+        <span class="count" id="msgCount">0/500</span>
+        <div class="row">
+          <button class="btn ghost" id="endBtn">토론 끝내기</button>
+          <button class="btn" id="sendBtn">보내기</button>
+        </div>
+      </div>
+      <div class="hint">✍️ <mark>주장 → 이유 → 예시</mark> 순서로 쓰고, <mark>판다의 반박에 직접 대답</mark>하면 점수가 크게 올라요. 같은 말 반복은 0점, 욕설·장난은 <mark class="pink">감점</mark>!</div>
+      <div class="err" id="sendErr"></div>
+    </div>
+    <div class="card fb hidden" id="resultCard"></div>
+  </section>
+</div>
+
+<!-- 1) 닉네임 -->
+<div class="overlay" id="nickPop">
+  <div class="pop form">
+    <h2>닉네임을 입력하세요</h2>
+    <p style="margin:0 0 12px">기록은 <mark>저장되지 않아요</mark>. 토론에서 부를 이름만 정해 주세요.</p>
+    <input type="text" id="nickIn" maxlength="12" placeholder="예: 판다사랑" autocomplete="off">
+    <div class="err" id="nickErr"></div>
+    <button class="btn" id="nickBtn" style="width:100%;margin-top:14px" disabled>불러오는 중...</button>
+  </div>
+</div>
+
+<!-- 2) 활동 방법 안내 팝업 -->
+<div class="overlay hidden" id="howPop">
+  <div class="pop wide">
+    <span class="badge">활동 방법</span>
+    <h2>🐼 AI 판다를 <mark>설득</mark>하라!</h2>
+    <ol class="steps-how">
+      <li><span class="n">1</span><div><b>토론 주제 확인하기</b><br>"발음이나 모양에서 연상되는 <mark>미신(금기)</mark>, 계속 지켜야 할까?" 그림으로 한국·중국의 예를 살펴봐요.</div></li>
+      <li><span class="n">2</span><div><b>내 입장 고르기</b><br><b style="color:var(--teal)">👍 찬성</b> 지켜야 할 문화 / <b style="color:var(--main)">👎 반대</b> 사라져야 할 미신</div></li>
+      <li><span class="n">3</span><div><b>판다와 토론하기</b><br>판다는 <mark>내 반대편</mark>이에요. 말할 기회는 딱 <mark>8번</mark>!</div></li>
+      <li><span class="n">4</span><div><b>설득 게이지 채우기</b> — 잘 쓸수록 많이 올라요
+        <div class="score-ex">
+          <div><span style="color:#2f7d5f">+12~20</span> <mark>주장 → 이유 → 예시</mark> + 판다 반박에 대답</div>
+          <div><span style="color:var(--sub)">+0~3</span> "그냥 그래" 처럼 짧은 말</div>
+          <div><span style="color:var(--bad)">감점</span> <mark class="pink">같은 말 반복, 욕설, 장난</mark></div>
+        </div></div></li>
+      <li><span class="n">5</span><div><b>게이지 100 = 설득 성공! 🎉</b><br>새로운 종류의 근거를 쓰면 <mark>근거 배지</mark>가 켜져요. 끝나면 코치가 피드백을 줘요.</div></li>
+    </ol>
+    <div class="warn">
+      <div class="wt">🚫 꼭 지켜 주세요!</div>
+      <b>욕설, 비속어, 친구 비하, 장난 글은 절대 쓰지 마세요.</b><br>
+      쓰면 <mark class="pink">게이지가 크게 깎이고(최대 -15점)</mark>, 토론 예절을 지키지 않은 것으로 봐요.<br>
+      판다는 AI지만, <mark>실제 사람과 이야기하듯 바른 말</mark>로 토론해요.
+    </div>
+    <button class="btn" style="width:100%" onclick="openTopic()">시작하기 →</button>
+  </div>
+</div>
+
+<!-- 3) 주제 + 입장 선택 팝업 -->
+<div class="overlay hidden" id="topicPop">
+  <div class="pop wide">
+    <div class="topic-head">
+      <span class="badge">4과 토론 주제</span>
+      <h2>발음이나 모양에서 연상되는 <mark>미신(금기)</mark>,<br>계속 지켜야 할까?</h2>
+    </div>
+    <div class="imgmsg" id="imgMsg" style="color:var(--sub)">그림 불러오는 중...</div>
+    <img class="timg hidden" id="topicImg" alt="한국의 미신과 중국의 해음 미신 비교 그림">
+
+    <div class="cmp hidden" id="cmpBox">
+      <div>
+        <h3>🇰🇷 한국</h3>
+        <ul>
+          <li><b>숫자 4</b> → 죽을 <mark>사(死)</mark>와 발음이 같아요</li>
+          <li><b>시험 날 미역국</b> → <mark>미끄러진다</mark></li>
+          <li><b>신발 선물</b> → 신고 <mark>도망간다</mark></li>
+          <li><b>엿·찹쌀떡</b> → 시험에 <mark>붙어라!</mark></li>
+        </ul>
+      </div>
+      <div>
+        <h3>🇨🇳 중국</h3>
+        <ul class="zh">
+          <li><b>숫자 4</b> 四<span class="py">(sì)</span> → <mark>死<span class="py">(sǐ)</span> 죽다</mark></li>
+          <li><b>시계 선물</b> 送钟<span class="py">(sòng zhōng)</span> → <mark>送终<span class="py">(sòngzhōng)</span> 장례</mark></li>
+          <li><b>배 선물</b> 梨<span class="py">(lí)</span> → <mark>离<span class="py">(lí)</span> 헤어지다</mark></li>
+          <li><b>우산 선물</b> 伞<span class="py">(sǎn)</span> → <mark>散<span class="py">(sàn)</span> 흩어지다</mark></li>
+          <li><b>福<span class="py">(fú)</span> 거꾸로</b> 倒<span class="py">(dào)</span> → <mark>到<span class="py">(dào)</span> 복이 왔다!</mark></li>
+          <li><b>생선 뒤집기</b> 翻<span class="py">(fān)</span> → <mark>翻船<span class="py">(fānchuán)</span> 배가 뒤집힘</mark></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rule" style="text-align:center">🎮 판다는 내 <b>반대편</b> · <b>8번</b> 안에 <b>게이지 100</b>이면 성공! · 🚫 <b>욕설·장난 절대 금지</b></div>
+
+    <div style="font-weight:700;font-size:20px;margin-bottom:10px;color:var(--ink);text-align:center">내 입장을 골라 주세요 👇</div>
+    <div class="sides">
+      <button class="pro" id="sidePro"><b>👍 찬성</b>존중하고 <mark>유지할 문화</mark>다</button>
+      <button class="con" id="sideCon"><b>👎 반대</b><mark class="pink">사라져야 할 미신</mark>이다</button>
+    </div>
+    <div class="row hidden" id="topicClose" style="justify-content:center;margin-top:14px"><button class="btn ghost" onclick="closeTopic()">닫고 토론 계속하기</button></div>
+  </div>
+</div>
+
+<!-- 결과 팝업 -->
+<div class="overlay hidden" id="overlay"><div class="pop" id="popBox"></div></div>
+
+<script>
+/* 입장별 근거 (짧고 쉽게) */
+const HINTS = {
+  pro: [
+    { t: '① 상대를 <mark>배려</mark>하는 마음', ex: '예) 생일 선물로 신발 대신 다른 걸 고르는 건 친구가 잘되길 바라는 마음이야.' },
+    { t: '② 생활 속 <mark>재미와 희망</mark>', ex: '예) 엿·찹쌀떡(붙어라!), 福 거꾸로 붙이기(복이 왔다!)는 힘이 나.' },
+    { t: '③ 다른 문화 <mark>존중</mark>', ex: '예) 중국 친구에게 시계를 선물하지 않으면 실수를 줄일 수 있어.' }
+  ],
+  con: [
+    { t: '① <mark class="pink">과학적 근거가 없다</mark>', ex: '예) 미역국을 먹어도 시험에 떨어지지 않아. 괜한 불안만 생겨.' },
+    { t: '② 생활이 <mark class="pink">불편</mark>해진다', ex: '예) 4층을 F층으로 써서 헷갈리고, 갖고 싶은 선물을 못 받아.' },
+    { t: '③ <mark class="pink">놀림·차별</mark>이 생긴다', ex: '예) 4번 친구를 "죽을 사"라고 놀리거나, 4층 집값이 낮아져.' }
+  ]
+};
+const SIDE_NAME = { pro: '👍 찬성 · 지켜야 할 문화', con: '👎 반대 · 사라져야 할 미신' };
+
+let T = null, maxTurns = 8, categories = [], nick = '', D = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const run = (fn, ...a) => new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...a));
+const errMsg = e => (e && e.message ? e.message : String(e)).replace(/^(Exception|Error):\s*/, '');
+
+run('getConfig').then(c => {
+  T = c.topic; maxTurns = c.maxTurns; categories = c.categories;
+  $('nickBtn').disabled = false; $('nickBtn').textContent = '입장하기';
+  $('nickIn').focus();
+}).catch(e => { $('nickErr').textContent = '설정을 불러오지 못했어요: ' + errMsg(e); });
+
+run('getImage').then(r => {
+  if (r && r.src) { $('topicImg').src = r.src; $('topicImg').classList.remove('hidden'); $('imgMsg').classList.add('hidden'); }
+  else imgFail((r && r.err) || '그림을 불러오지 못했어요.');
+}).catch(e => imgFail(errMsg(e)));
+function imgFail(m) { $('imgMsg').classList.add('hidden'); $('cmpBox').classList.remove('hidden'); console.warn('그림 오류:', m); }
+
+document.addEventListener('click', e => {
+  if (e.target.classList && e.target.classList.contains('timg')) {
+    const z = document.createElement('div'); z.className = 'zoombox';
+    z.innerHTML = '<img alt="">'; z.firstChild.src = e.target.src;
+    z.onclick = () => z.remove(); document.body.appendChild(z);
+  }
+});
+
+function enter() {
+  const n = $('nickIn').value.trim();
+  if (!n) { $('nickErr').textContent = '닉네임을 입력해 주세요.'; return; }
+  nick = n;
+  $('whoLabel').textContent = nick + ' 님';
+  $('nickPop').classList.add('hidden');
+  $('howPop').classList.remove('hidden');
+}
+function openTopic() { $('howPop').classList.add('hidden'); $('topicPop').classList.remove('hidden'); $('topicPop').scrollTop = 0; }
+$('nickBtn').onclick = enter;
+$('nickIn').onkeydown = e => { if (e.key === 'Enter' && !e.isComposing && !$('nickBtn').disabled) enter(); };
+
+function closeTopic() { $('topicPop').classList.add('hidden'); }
+$('topicBtn').onclick = () => { $('topicClose').classList.remove('hidden'); $('topicPop').classList.remove('hidden'); $('topicPop').scrollTop = 0; };
+$('sidePro').onclick = () => pickSide('pro');
+$('sideCon').onclick = () => pickSide('con');
+function pickSide(side) {
+  if (D && !D.ended && D.turns > 0 && D.side !== side && !confirm('입장을 바꾸면 지금 토론이 처음부터 다시 시작돼요. 바꿀까요?')) return;
+  if (D && !D.ended && D.side === side) { closeTopic(); return; }
+  closeTopic(); startDebate(side);
+}
+
+function startDebate(side) {
+  D = { side, history: [], gauge: 0, cats: new Set(), turns: 0, busy: false, ended: false };
+  $('debateView').classList.remove('hidden');
+  $('topicBtn').classList.remove('hidden');
+  $('resultCard').classList.add('hidden');
+  $('composer').classList.remove('hidden');
+  $('dTopic').textContent = T.title;
+  $('sideTag').className = 'sidetag ' + side; $('sideTag').textContent = SIDE_NAME[side];
+  $('hintsMine').innerHTML = HINTS[side].map(h => '<div class="hitem"><div class="t">' + h.t + '</div><div class="ex">' + esc(h.ex) + '</div></div>').join('');
+  $('chat').innerHTML = ''; $('msgIn').value = ''; $('msgCount').textContent = '0/500'; $('sendErr').textContent = '';
+  $('catBadges').innerHTML = categories.map(c => '<span data-c="' + esc(c) + '">' + esc(c) + '</span>').join('');
+  setGauge(0); updateTurn();
+  addMsg('ai', '📢 ' + nick + ', ' + maxTurns + '번 안에 게이지 100을 채우면 성공이야! 이유와 예시를 자세히 들려줘.');
+  const opening = side === 'pro' ? T.opening.con : T.opening.pro;
+  addMsg('ai', opening);
+  D.history.push({ role: 'ai', text: opening });
+  window.scrollTo(0, 0);
+}
+function setGauge(v) { $('gBar').style.width = v + '%'; $('gNum').textContent = v; }
+function updateTurn() { $('turnLabel').innerHTML = '남은 기회 <b>' + (maxTurns - D.turns) + '</b>번'; }
+function addMsg(who, text) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + (who === 'ai' ? 'ai' : 'me');
+  d.innerHTML = (who === 'ai' ? '<span class="nm">🐼 판다</span>' : '') + esc(text);
+  $('chat').appendChild(d);
+  d.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  return d;
+}
+function addDelta(r) {
+  const d = document.createElement('div');
+  d.className = 'delta ' + (r.delta > 0 ? 'up' : r.delta < 0 ? 'down' : 'zero');
+  let s = '<b>' + (r.delta > 0 ? '+' : '') + r.delta + '점</b>';
+  if (r.category && r.category !== '없음') s += ' · ' + esc(r.category);
+  if (r.comment) s += ' — ' + esc(r.comment);
+  d.innerHTML = s;
+  $('chat').appendChild(d);
+}
+function fly(text) {
+  const f = document.createElement('div'); f.className = 'fly'; f.textContent = text;
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1700);
+}
+$('msgIn').oninput = () => { $('msgCount').textContent = $('msgIn').value.length + '/500'; };
+$('msgIn').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } };
+$('sendBtn').onclick = send;
+
+async function send() {
+  if (!D || D.busy || D.ended) return;
+  const msg = $('msgIn').value.trim();
+  if (msg.length < 2) { $('sendErr').textContent = '의견을 입력해 주세요.'; return; }
+  D.busy = true; $('sendBtn').disabled = true; $('sendErr').textContent = '';
+  const mine = addMsg('me', msg);
+  $('msgIn').value = ''; $('msgCount').textContent = '0/500';
+  const typing = addMsg('ai', '생각하는 중...'); typing.classList.add('typing');
+  try {
+    const r = await run('debateTurn', { nick, side: D.side, history: D.history, gauge: D.gauge, usedCats: [...D.cats], message: msg });
+    typing.remove();
+    D.history.push({ role: 'user', text: msg }, { role: 'ai', text: r.reply });
+    D.turns++;
+    addDelta(r); addMsg('ai', r.reply);
+    if (r.category && r.category !== '없음' && !D.cats.has(r.category)) {
+      D.cats.add(r.category);
+      const b = document.querySelector('#catBadges span[data-c="' + r.category + '"]');
+      if (b) b.classList.add('on');
+      fly('새 근거 유형! ' + r.category);
+    }
+    D.gauge = r.gauge; setGauge(D.gauge); updateTurn();
+    if (r.persuaded) setTimeout(() => endDebate(true), 900);
+    else if (D.turns >= maxTurns) setTimeout(() => endDebate(false), 900);
+  } catch (e) {
+    typing.remove(); mine.remove();
+    $('msgIn').value = msg; $('msgCount').textContent = msg.length + '/500';
+    $('sendErr').textContent = errMsg(e);
+  }
+  D.busy = false; $('sendBtn').disabled = false;
+}
+
+$('endBtn').onclick = () => {
+  if (!D || D.ended || D.busy) return;
+  if (D.turns === 0) { $('sendErr').textContent = '한 번 이상 의견을 말해 보세요.'; return; }
+  endDebate(false);
+};
+
+async function endDebate(success) {
+  D.ended = true;
+  $('composer').classList.add('hidden');
+  showPop(success
+    ? '<div class="big">🎉</div><h2>설득 성공!</h2><p><mark>' + D.turns + '번</mark> 만에 판다를 설득했어요!<br>사용한 근거 유형: <b>' + D.cats.size + '가지</b></p>'
+    : '<div class="big">🤔</div><h2>판다가 고민 중이에요</h2><p>최종 설득 게이지: <mark>' + D.gauge + ' / 100</mark><br>사용한 근거 유형: <b>' + D.cats.size + '가지</b></p>');
+  const rc = $('resultCard');
+  rc.classList.remove('hidden');
+  rc.innerHTML = '<h2 style="font-size:24px;margin:0">토론 코치의 피드백</h2><p>피드백을 만드는 중...</p>';
+  try {
+    const f = await run('debateFeedback', { side: D.side, history: D.history, gauge: D.gauge });
+    rc.innerHTML = '<h2 style="font-size:24px;margin:0">토론 코치의 피드백</h2>' +
+      '<div class="g"><b>👍 잘한 점</b><br>' + esc(f.good) + '</div>' +
+      '<div class="i"><b>🔧 보완할 점</b><br>' + esc(f.improve) + '</div>' +
+      '<div class="n"><b>💡 다음에 써 볼 근거</b><br>' + esc(f.nextArg) + '</div>';
+  } catch (e) {
+    rc.innerHTML = '<h2 style="font-size:24px;margin:0">토론 결과</h2><p>피드백을 불러오지 못했어요.</p>';
+  }
+  rc.innerHTML += '<div class="row" style="margin-top:14px"><button class="btn" onclick="startDebate(D.side===\'pro\'?\'con\':\'pro\')">반대 입장으로 다시</button><button class="btn ghost" onclick="startDebate(D.side)">같은 입장으로 다시</button></div>';
+  rc.scrollIntoView({ behavior: 'smooth' });
+}
+function showPop(html) {
+  $('popBox').innerHTML = html + '<button class="btn" style="margin-top:10px" onclick="document.getElementById(\'overlay\').classList.add(\'hidden\')">확인</button>';
+  $('overlay').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
