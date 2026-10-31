@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<base target="_top">
 <meta charset="utf-8">
+<title>중국문화 탐구 AI 토론</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -268,7 +268,13 @@ const SIDE_NAME = { pro: '👍 찬성 · 지켜야 할 문화', con: '👎 반�
 let T = null, maxTurns = 8, categories = [], nick = '', D = null;
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const run = (fn, ...a) => new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...a));
+/* 서버(/api/debate) 호출 */
+const run = async (fn, payload) => {
+  const res = await fetch('/api/debate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: fn, payload }) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || ('서버 오류 (' + res.status + ')'));
+  return data;
+};
 const errMsg = e => (e && e.message ? e.message : String(e)).replace(/^(Exception|Error):\s*/, '');
 
 run('getConfig').then(c => {
@@ -277,10 +283,9 @@ run('getConfig').then(c => {
   $('nickIn').focus();
 }).catch(e => { $('nickErr').textContent = '설정을 불러오지 못했어요: ' + errMsg(e); });
 
-run('getImage').then(r => {
-  if (r && r.src) { $('topicImg').src = r.src; $('topicImg').classList.remove('hidden'); $('imgMsg').classList.add('hidden'); }
-  else imgFail((r && r.err) || '그림을 불러오지 못했어요.');
-}).catch(e => imgFail(errMsg(e)));
+$('topicImg').onload = () => { $('topicImg').classList.remove('hidden'); $('imgMsg').classList.add('hidden'); };
+$('topicImg').onerror = () => imgFail('yeonsang.png 파일을 찾지 못했어요.');
+$('topicImg').src = 'yeonsang.png';
 function imgFail(m) { $('imgMsg').classList.add('hidden'); $('cmpBox').classList.remove('hidden'); console.warn('그림 오류:', m); }
 
 document.addEventListener('click', e => {
